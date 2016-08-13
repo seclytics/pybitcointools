@@ -703,7 +703,8 @@ get_tx_sigs = extract_ders = der_extract
 
 def mk_opreturn(msg, txhex=None):
     """Makes OP_RETURN script from msg, embeds in Tx hex"""    
-    hexdata = safe_hexlify(b'\x6a' + wrap_script(msg))
+    binary_string = binascii.unhexlify(msg)
+    hexdata = safe_hexlify(b'\x6a' + num_to_op_push(len(binary_string))) + msg
     if txhex is None:
         return hexdata
     else:
@@ -719,7 +720,7 @@ def mk_opreturn(msg, txhex=None):
         assert (len(outs) > 0) and sum(multiaccess(outs, 'value')) > 0 \
                 and not any([o for o in outs if o.get("script")[:2] == '6a']), \
             "Tx limited to *1* OP_RETURN, and only whilst the other outputs send funds"
-        outs.append({
+        txo['outs'].append({
                     'script': hexdata, 
                     'value': 0
                     })
